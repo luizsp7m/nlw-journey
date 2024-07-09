@@ -37,7 +37,7 @@ async function create({
       owner_email: 'luizoliveira@gmail.com',
     })
 
-    return data.tripId
+    return data
   } catch (error) {
     throw error
   }
