@@ -7,9 +7,9 @@ import {
   TouchableOpacityProps,
   View,
   ActivityIndicator,
-} from "react-native";
+} from 'react-native'
 
-import { createContext, useContext } from "react";
+import { createContext, useContext } from 'react'
 
 type Variants = 'primary' | 'secondary'
 
@@ -18,7 +18,7 @@ type ButtonProps = TouchableOpacityProps & {
   isLoading?: boolean
 }
 
-const ThemeContext = createContext({} as { variant: Variants });
+const ThemeContext = createContext({} as { variant: Variants })
 
 function Button({
   variant = 'primary',
@@ -27,24 +27,26 @@ function Button({
   ...props
 }: ButtonProps) {
   return (
-    <ThemeContext.Provider value={{
-      variant
-    }}>
-      <TouchableOpacity
-        disabled={isLoading}
-        activeOpacity={0.70}
-        {...props}
-      >
+    <ThemeContext.Provider
+      value={{
+        variant,
+      }}
+    >
+      <TouchableOpacity disabled={isLoading} activeOpacity={0.7} {...props}>
         <View
           className={clsx(
-            "w-full h-11 flex-row items-center justify-center rounded-lg gap-2",
+            'w-full h-11 flex-row items-center justify-center rounded-lg gap-2',
             {
-              "bg-lime-300": variant === 'primary',
-              "bg-zinc-800": variant === 'secondary'
+              'bg-lime-300': variant === 'primary',
+              'bg-zinc-800': variant === 'secondary',
             },
           )}
         >
-          {isLoading ? <ActivityIndicator className='text-lime-950' /> : children}
+          {isLoading ? (
+            <ActivityIndicator className="text-lime-950" />
+          ) : (
+            children
+          )}
         </View>
       </TouchableOpacity>
     </ThemeContext.Provider>
@@ -52,14 +54,14 @@ function Button({
 }
 
 function Title({ children }: TextProps) {
-  const { variant } = useContext(ThemeContext);
+  const { variant } = useContext(ThemeContext)
 
   return (
     <Text
       className={clsx(
-        "",
-        { "text-lime-950": variant === 'primary' },
-        { "text-zinc-200": variant === 'secondary' },
+        '',
+        { 'text-lime-950': variant === 'primary' },
+        { 'text-zinc-200': variant === 'secondary' },
       )}
     >
       {children}
@@ -69,4 +71,4 @@ function Title({ children }: TextProps) {
 
 Button.Title = Title
 
-export { Button } 
+export { Button }
