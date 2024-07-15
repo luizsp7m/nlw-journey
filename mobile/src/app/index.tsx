@@ -28,7 +28,7 @@ import { Loading } from '@/components/loading'
 
 enum StepForm {
   TRIP_DETAILS = 1,
-  ADD_EMAILS = 2,
+  ADD_EMAIL = 2,
 }
 
 enum MODAL {
@@ -57,24 +57,30 @@ export default function App() {
     ) {
       return Alert.alert(
         'Detalhes da viagem',
-        'Preencha todas as informações da viagem',
+        'Preencha todos as informações da viagem para seguir.',
       )
     }
 
     if (destination.length < 4) {
       return Alert.alert(
         'Detalhes da viagem',
-        'O destino deve ter pelo menos 4 caracteres',
+        'O destino deve ter pelo menos 4 caracteres.',
       )
     }
 
     if (stepForm === StepForm.TRIP_DETAILS) {
-      return setStepForm(StepForm.ADD_EMAILS)
+      return setStepForm(StepForm.ADD_EMAIL)
     }
 
-    Alert.alert('Nova viagem', 'Confirmar viagem', [
-      { text: 'Não', style: 'cancel' },
-      { text: 'Sim', onPress: createTrip },
+    Alert.alert('Nova viagem', 'Confirmar viagem?', [
+      {
+        text: 'Não',
+        style: 'cancel',
+      },
+      {
+        text: 'Sim',
+        onPress: createTrip,
+      },
     ])
   }
 
@@ -96,11 +102,15 @@ export default function App() {
 
   function handleAddEmail() {
     if (!validateInput.email(emailToInvite)) {
-      return Alert.alert('Convidado', 'E-mail inválido')
+      return Alert.alert('Convidado', 'E-mail inválido!')
     }
 
-    if (emailsToInvite.includes(emailToInvite)) {
-      return Alert.alert('Convidado', 'E-mail já foi adicionado')
+    const emailAlreadyExists = emailsToInvite.find(
+      (email) => email === emailToInvite,
+    )
+
+    if (emailAlreadyExists) {
+      return Alert.alert('Convidado', 'E-mail já foi adicionado!')
     }
 
     setEmailsToInvite((prevState) => [...prevState, emailToInvite])
@@ -110,13 +120,12 @@ export default function App() {
   async function saveTrip(tripId: string) {
     try {
       await tripStorage.save(tripId)
-      router.navigate(`/trip/${tripId}`)
+      router.navigate('/trip/' + tripId)
     } catch (error) {
       Alert.alert(
         'Salvar viagem',
-        'Não foi possível salvar o ID da viagem no dispositivo',
+        'Não foi possível salvar o id da viagem no dispositivo.',
       )
-
       console.log(error)
     }
   }
@@ -146,16 +155,16 @@ export default function App() {
 
   async function getTrip() {
     try {
-      const tripId = await tripStorage.get()
+      const tripID = await tripStorage.get()
 
-      if (!tripId) {
+      if (!tripID) {
         return setIsGettingTrip(false)
       }
 
-      const trip = await tripServer.getById(tripId)
+      const trip = await tripServer.getById(tripID)
 
       if (trip) {
-        return router.navigate(`trip/${trip.id}`)
+        return router.navigate('/trip/' + trip.id)
       }
     } catch (error) {
       setIsGettingTrip(false)
@@ -177,19 +186,17 @@ export default function App() {
         source={require('@/assets/logo.png')}
         className="h-8"
         resizeMode="contain"
-        alt=""
       />
 
       <Image source={require('@/assets/bg.png')} className="absolute" />
 
       <Text className="text-zinc-400 font-regular text-center text-lg mt-3">
-        Convide seus amigos e planeje sua {'\n'} próxima viagem
+        Convide seus amigos e planeje sua{'\n'}próxima viagem
       </Text>
 
       <View className="w-full bg-zinc-900 p-4 rounded-xl my-8 border border-zinc-800">
-        <Input variant="primary">
+        <Input>
           <MapPin color={colors.zinc[400]} size={20} />
-
           <Input.Field
             placeholder="Para onde?"
             editable={stepForm === StepForm.TRIP_DETAILS}
@@ -200,7 +207,6 @@ export default function App() {
 
         <Input>
           <CalendarIcon color={colors.zinc[400]} size={20} />
-
           <Input.Field
             placeholder="Quando?"
             editable={stepForm === StepForm.TRIP_DETAILS}
@@ -213,8 +219,8 @@ export default function App() {
           />
         </Input>
 
-        {stepForm === StepForm.ADD_EMAILS && (
-          <Fragment>
+        {stepForm === StepForm.ADD_EMAIL && (
+          <>
             <View className="border-b py-3 border-zinc-800">
               <Button
                 variant="secondary"
@@ -232,7 +238,7 @@ export default function App() {
                 autoCorrect={false}
                 value={
                   emailsToInvite.length > 0
-                    ? `${emailsToInvite.length} pessoa(s) convidada(s)`
+                    ? `${emailsToInvite.length} pessoas(a) convidada(s)`
                     : ''
                 }
                 onPress={() => {
@@ -242,25 +248,24 @@ export default function App() {
                 showSoftInputOnFocus={false}
               />
             </Input>
-          </Fragment>
+          </>
         )}
 
         <Button onPress={handleNextStepForm} isLoading={isCreatingTrip}>
           <Button.Title>
             {stepForm === StepForm.TRIP_DETAILS
               ? 'Continuar'
-              : 'Confirmar viagem'}
+              : 'Confirmar Viagem'}
           </Button.Title>
-
           <ArrowRight color={colors.lime[950]} size={20} />
         </Button>
       </View>
 
-      <Text className="text-zinc-500 text-center font-regular text-base">
+      <Text className="text-zinc-500 font-regular text-center text-base">
         Ao planejar sua viagem pela plann.er você automaticamente concorda com
         nossos{' '}
         <Text className="text-zinc-300 underline">
-          termos de uso e políticas de privacidade
+          termos de uso e políticas de privacidade.
         </Text>
       </Text>
 
@@ -285,7 +290,7 @@ export default function App() {
 
       <Modal
         title="Selecionar convidados"
-        subtitle="Os convidados irão receber e-mails para confirmar a participação na viagem"
+        subtitle="Os convidados irão receber e-mails para confirmar a participação na viagem."
         visible={showModal === MODAL.GUESTS}
         onClose={() => setShowModal(MODAL.NONE)}
       >
@@ -300,7 +305,7 @@ export default function App() {
             ))
           ) : (
             <Text className="text-zinc-600 text-base font-regular">
-              Nenhum e-mail adicionado
+              Nenhum e-mail adicionado.
             </Text>
           )}
         </View>
@@ -308,7 +313,6 @@ export default function App() {
         <View className="gap-4 mt-4">
           <Input variant="secondary">
             <AtSign color={colors.zinc[400]} size={20} />
-
             <Input.Field
               placeholder="Digite o e-mail do convidado"
               keyboardType="email-address"
