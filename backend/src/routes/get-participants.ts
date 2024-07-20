@@ -5,9 +5,9 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { prisma } from '../lib/prisma'
 import { ClientError } from '../errors/client-errors'
 
-export async function getLinks(app: FastifyInstance) {
+export async function getParticipants(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
-    '/trips/:tripId/links',
+    '/trips/:tripId/participants',
     {
       schema: {
         params: z.object({
@@ -23,8 +23,15 @@ export async function getLinks(app: FastifyInstance) {
           id: tripId,
         },
 
-        include: {
-          links: true,
+        select: {
+          participants: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              is_confirmed: true,
+            },
+          },
         },
       })
 
@@ -33,7 +40,7 @@ export async function getLinks(app: FastifyInstance) {
       }
 
       return {
-        links: trip.links,
+        participants: trip.participants,
       }
     },
   )

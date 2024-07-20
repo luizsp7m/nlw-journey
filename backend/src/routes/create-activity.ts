@@ -4,6 +4,7 @@ import { dayjs } from '../lib/dayjs'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { prisma } from '../lib/prisma'
+import { ClientError } from '../errors/client-errors'
 
 const activitySchema = z.object({
   title: z.string().min(3),
@@ -32,15 +33,15 @@ export async function createActivity(app: FastifyInstance) {
       })
 
       if (!trip) {
-        throw new Error('Trip not found')
+        throw new ClientError('Trip not found')
       }
 
       if (dayjs(occurs_at).isBefore(trip.starts_at)) {
-        throw new Error('Occurs date can not be before start date')
+        throw new ClientError('Occurs date can not be before start date')
       }
 
       if (dayjs(occurs_at).isAfter(trip.ends_at)) {
-        throw new Error('Occurs date can not be after end date')
+        throw new ClientError('Occurs date can not be after end date')
       }
 
       const dateIsAlreadyInUse = await prisma.activity.findFirst({
@@ -50,7 +51,7 @@ export async function createActivity(app: FastifyInstance) {
       })
 
       if (dateIsAlreadyInUse) {
-        throw new Error('There is already an activity at that time')
+        throw new ClientError('There is already an activity at that time')
       }
 
       const activity = await prisma.activity.create({
